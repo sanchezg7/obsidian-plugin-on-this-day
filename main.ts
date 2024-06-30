@@ -7,7 +7,7 @@ import {
 	Plugin,
 	PluginSettingTab,
 	Setting,
-	SuggestModal
+	FuzzySuggestModal
 } from 'obsidian';
 
 interface MyPluginSettings {
@@ -49,7 +49,6 @@ export default class MyPlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
 			new OnThisDaySuggestions(this.app).open();
 		});
 		// Perform additional things with the ribbon
@@ -98,51 +97,29 @@ class SampleModal extends Modal {
 		contentEl.empty();
 	}
 }
-interface Book {
-	title: string;
-	author: string;
-}
 
 interface SlimFile {
 	path: string;
 	name: string;
 }
 
-const ALL_BOOKS = [
-	{
-		title: "How to Take Smart Notes",
-		author: "Sönke Ahrens",
-	},
-	{
-		title: "Thinking, Fast and Slow",
-		author: "Daniel Kahneman",
-	},
-	{
-		title: "Deep Work",
-		author: "Cal Newport",
-	},
-];
 
-
-export class OnThisDaySuggestions extends SuggestModal<SlimFile> {
+export class OnThisDaySuggestions extends FuzzySuggestModal<SlimFile> {
 	// Returns all available suggestions.
-	getSuggestions(query: string): SlimFile[] {
-		// return ALL_BOOKS.filter((book) =>
-		// 	book.title.toLowerCase().includes(query.toLowerCase())
-		// );
+	getItems(): SlimFile[] {
 		const fmp = this.app.vault.fileMap;
-		return getFilesOnThisDay(fmp).map(key => fmp[key]);
+		return getFilesOnThisDay(fmp)
+			.map(key => fmp[key])
 	}
 
-	// Renders each suggestion item.
-	renderSuggestion(slimFile: SlimFile, el: HTMLElement) {
-		el.createEl("div", { text: slimFile.name });
-		el.createEl("small", { text: slimFile.path });
+	getItemText(slimFile: SlimFile) {
+		return `${slimFile.name} | (${slimFile.path})`;
 	}
 
 	// Perform action on the selected suggestion.
-	onChooseSuggestion(book: Book, evt: MouseEvent | KeyboardEvent) {
-		new Notice(`Selected ${book.title}`);
+	onChooseItem() {
+		// TODO, pick from different messages in the future
+		new Notice(`Good choice. Happy reflecting. Enable me to choose random messages in the future`);
 	}
 }
 
