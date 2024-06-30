@@ -103,6 +103,11 @@ interface Book {
 	author: string;
 }
 
+interface SlimFile {
+	path: string;
+	name: string;
+}
+
 const ALL_BOOKS = [
 	{
 		title: "How to Take Smart Notes",
@@ -118,18 +123,21 @@ const ALL_BOOKS = [
 	},
 ];
 
-export class OnThisDaySuggestions extends SuggestModal<Book> {
+
+export class OnThisDaySuggestions extends SuggestModal<SlimFile> {
 	// Returns all available suggestions.
-	getSuggestions(query: string): Book[] {
-		return ALL_BOOKS.filter((book) =>
-			book.title.toLowerCase().includes(query.toLowerCase())
-		);
+	getSuggestions(query: string): SlimFile[] {
+		// return ALL_BOOKS.filter((book) =>
+		// 	book.title.toLowerCase().includes(query.toLowerCase())
+		// );
+		const fmp = this.app.vault.fileMap;
+		return getFilesOnThisDay(fmp).map(key => fmp[key]);
 	}
 
 	// Renders each suggestion item.
-	renderSuggestion(book: Book, el: HTMLElement) {
-		el.createEl("div", { text: book.title });
-		el.createEl("small", { text: book.author });
+	renderSuggestion(slimFile: SlimFile, el: HTMLElement) {
+		el.createEl("div", { text: slimFile.name });
+		el.createEl("small", { text: slimFile.path });
 	}
 
 	// Perform action on the selected suggestion.
