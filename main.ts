@@ -1,6 +1,14 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
-// Remember to rename these classes and interfaces!
+import {
+	App,
+	Editor,
+	MarkdownView,
+	Modal,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+	SuggestModal
+} from 'obsidian';
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -9,42 +17,47 @@ interface MyPluginSettings {
 const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
+const getFilesOnThisDay = (fileMap: {}) => {
+	return Object.keys(fileMap).filter((key) => {
+		const now = new Date();
+		const prepadmonth = now.getMonth() + 1;
+		const month = prepadmonth < 10 ? "0" + prepadmonth : prepadmonth;
+		const day = now.getDate();
+		const regex = new RegExp("20\\d\\d" + month + day + "\.md");
+		return regex.test(key);
+	});
+}
+
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
-	async averageFileLength(): Promise<number> {
-		const { vault } = this.app;
-
-		const fileContents: string[] = await Promise.all(
-			vault.getMarkdownFiles().map((file) => vault.cachedRead(file))
-		);
-
-		let totalLength = 0;
-		fileContents.forEach((content) => {
-			totalLength += content.length;
-		});
-
-		return totalLength / fileContents.length;
-	}
+	// How to bring from a module?
+	// async averageFileLength(): Promise<number> {
+	// 	const { vault } = this.app;
+	//
+	// 	const fileContents: string[] = await Promise.all(
+	// 		vault.getMarkdownFiles().map((file) => vault.cachedRead(file))
+	// 	);
+	//
+	// 	let totalLength = 0;
+	// 	fileContents.forEach((content) => {
+	// 		totalLength += content.length;
+	// 	});
+	//
+	// 	return totalLength / fileContents.length;
+	// }
 
 	async onload() {
 		await this.loadSettings();
-		this.addRibbonIcon("info", "Calculate average file length", async () => {
-			const fileLength = await this.averageFileLength();
-			new Notice(`The average file length is ${fileLength} characters.`);
-		});
+		// this.addRibbonIcon("info", "Calculate average file length", async () => {
+		// 	const fileLength = await this.averageFileLength();
+		// 	new Notice(`The average file length is ${fileLength} characters.`);
+		// });
 
 		this.addRibbonIcon("atom", "Open on this day", async () => {
 			// new Notice("Clicked!");
 			const { vault } = this.app;
-			const filesOnThisDay = Object.keys(vault.fileMap).filter((key) => {
-				const now = new Date();
-				const prepadmonth = now.getMonth() + 1;
-				const month = prepadmonth < 10 ? "0" + prepadmonth : prepadmonth;
-				const day = now.getDate();
-				const regex = new RegExp("20\\d\\d" + month + day + "\.md");
-				return regex.test(key);
-			});
+			const filesOnThisDay = getFilesOnThisDay(vault.fileMap)
 			// assumes one file only
 			if(filesOnThisDay.length === 1) {
 				this.app.workspace.activeLeaf.openFile(vault.fileMap[filesOnThisDay[0]]);
@@ -56,6 +69,7 @@ export default class MyPlugin extends Plugin {
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new Notice('This is a notice!');
+			new OnThisDaySuggestions(this.app).open();
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -64,42 +78,6 @@ export default class MyPlugin extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
 
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SampleSettingTab(this.app, this));
@@ -140,6 +118,45 @@ class SampleModal extends Modal {
 	onClose() {
 		const {contentEl} = this;
 		contentEl.empty();
+	}
+}
+interface Book {
+	title: string;
+	author: string;
+}
+
+const ALL_BOOKS = [
+	{
+		title: "How to Take Smart Notes",
+		author: "Sönke Ahrens",
+	},
+	{
+		title: "Thinking, Fast and Slow",
+		author: "Daniel Kahneman",
+	},
+	{
+		title: "Deep Work",
+		author: "Cal Newport",
+	},
+];
+
+export class OnThisDaySuggestions extends SuggestModal<Book> {
+	// Returns all available suggestions.
+	getSuggestions(query: string): Book[] {
+		return ALL_BOOKS.filter((book) =>
+			book.title.toLowerCase().includes(query.toLowerCase())
+		);
+	}
+
+	// Renders each suggestion item.
+	renderSuggestion(book: Book, el: HTMLElement) {
+		el.createEl("div", { text: book.title });
+		el.createEl("small", { text: book.author });
+	}
+
+	// Perform action on the selected suggestion.
+	onChooseSuggestion(book: Book, evt: MouseEvent | KeyboardEvent) {
+		new Notice(`Selected ${book.title}`);
 	}
 }
 
