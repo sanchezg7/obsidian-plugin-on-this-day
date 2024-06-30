@@ -31,28 +31,9 @@ const getFilesOnThisDay = (fileMap: {}) => {
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
-	// How to bring from a module?
-	// async averageFileLength(): Promise<number> {
-	// 	const { vault } = this.app;
-	//
-	// 	const fileContents: string[] = await Promise.all(
-	// 		vault.getMarkdownFiles().map((file) => vault.cachedRead(file))
-	// 	);
-	//
-	// 	let totalLength = 0;
-	// 	fileContents.forEach((content) => {
-	// 		totalLength += content.length;
-	// 	});
-	//
-	// 	return totalLength / fileContents.length;
-	// }
 
 	async onload() {
 		await this.loadSettings();
-		// this.addRibbonIcon("info", "Calculate average file length", async () => {
-		// 	const fileLength = await this.averageFileLength();
-		// 	new Notice(`The average file length is ${fileLength} characters.`);
-		// });
 
 		this.addRibbonIcon("atom", "Open on this day", async () => {
 			// new Notice("Clicked!");
@@ -78,9 +59,6 @@ export default class MyPlugin extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
 
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
