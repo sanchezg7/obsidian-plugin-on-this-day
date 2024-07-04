@@ -127,12 +127,15 @@ enum NOTE_QUERY_STRAT {
 	MONTHLY,
 	DAILY
 }
-
 /**
  * Will show entries based on config
  */
 export class NoteEntriesSuggestionsModal extends FuzzySuggestModal<SlimFile> {
 	private noteQueryStrat: NOTE_QUERY_STRAT;
+	private results: any[];
+	private OPEN_ALL = "Open all";
+	private WARNING_OPEN_ALL = "Will open all results, be careful in selecting this options for big sets"
+
 	constructor(app: App, strat: NOTE_QUERY_STRAT = NOTE_QUERY_STRAT.YEARLY) {
 		super(app);
 		this.noteQueryStrat = strat;
@@ -140,8 +143,11 @@ export class NoteEntriesSuggestionsModal extends FuzzySuggestModal<SlimFile> {
 	// Returns all available suggestions.
 	getItems(): SlimFile[] {
 		const fmp = this.app.vault.fileMap;
-		return getFiles(fmp, this.noteQueryStrat)
-			.map(key => fmp[key])
+		this.results = [
+			{name: this.OPEN_ALL, path: this.WARNING_OPEN_ALL},
+			...getFiles(fmp, this.noteQueryStrat)
+				.map(key => fmp[key])]
+		return this.results;
 	}
 
 	getItemText(slimFile: SlimFile) {
@@ -152,6 +158,13 @@ export class NoteEntriesSuggestionsModal extends FuzzySuggestModal<SlimFile> {
 	onChooseItem(slimFile: SlimFile, evt: MouseEvent | KeyboardEvent) {
 		// TODO, pick from different messages in the future
 		new Notice(`Good choice. Happy reflecting. Enable me to choose random messages in the future`);
-		this.app.workspace.activeLeaf.openFile(this.app.vault.fileMap[slimFile.path]);
+		if(slimFile.name === this.OPEN_ALL){
+			this.app.workspace.getLeaf(true);
+			this.results.slice(1,this.results.length).forEach(sFile => {
+				this.app.workspace.getLeaf(true).openFile(this.app.vault.fileMap[sFile.path])
+			})
+		} else {
+			this.app.workspace.getLeaf().openFile(this.app.vault.fileMap[slimFile.path]);
+		}
 	}
 }
