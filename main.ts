@@ -1,12 +1,6 @@
 import {
-	App,
-	Editor,
-	MarkdownView,
-	Modal,
 	Notice,
 	Plugin,
-	PluginSettingTab,
-	Setting,
 	FuzzySuggestModal
 } from 'obsidian';
 
@@ -34,7 +28,7 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		
+
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('waves', 'View notes in the past', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
@@ -58,22 +52,6 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-	}
-}
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
 	}
 }
 
@@ -106,31 +84,5 @@ export class NoteEntriesSuggestionsModal extends FuzzySuggestModal<SlimFile> {
 		// TODO, pick from different messages in the future
 		new Notice(`Good choice. Happy reflecting. Enable me to choose random messages in the future`);
 		this.app.workspace.activeLeaf.openFile(this.app.vault.fileMap[slimFile.path]);
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
 	}
 }
