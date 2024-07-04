@@ -6,6 +6,10 @@ This is a sample plugin for Obsidian (https://obsidian.md).
 https://lucide.dev/
  
 ---
+
+## Regex
+Inline evaluation of regex for set of flatten keys
+new RegExp("2024(0|1)(5|6)30.md").test(Object.keys(fmp))
  
 
 This project uses Typescript to provide type checking and documentation.

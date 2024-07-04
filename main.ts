@@ -1,7 +1,8 @@
 import {
 	Notice,
 	Plugin,
-	FuzzySuggestModal
+	FuzzySuggestModal,
+	moment
 } from 'obsidian';
 
 interface MyPluginSettings {
@@ -15,7 +16,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 const getFiles = (fileMap: {}, strategy: NOTE_QUERY_STRAT) => {
 	switch (strategy) {
 		case NOTE_QUERY_STRAT.DAILY:
-			return getFilesOnThisDayMonthStrategy(fileMap);
+			return getFilesOnThisDayWeekStrategy(fileMap);
 		case NOTE_QUERY_STRAT.MONTHLY:
 			return getFilesOnThisDayMonthStrategy(fileMap);
 		case NOTE_QUERY_STRAT.YEARLY:
@@ -39,14 +40,18 @@ const getCleanDate = (date: Date): cleanDate => {
 	}
 };
 
+/**
+ * Past 7 days.
+ * @param fileMap
+ */
 const getFilesOnThisDayWeekStrategy = (fileMap: {}) => {
 	return Object.keys(fileMap).filter((key) => {
-		const now = new Date();
-		const prepadmonth = now.getMonth() + 1;
-		const month = prepadmonth < 10 ? "0" + prepadmonth : prepadmonth;
-		const day = now.getDate();
-		const regex = new RegExp("20\\d\\d" + month + day + "\.md");
-		return regex.test(key);
+		const match = new RegExp(/\/+(?<noteDate>[0-9]{8})\.md$/).exec(key);
+		if(match === null) return false;
+		const noteDate = match.groups.noteDate;
+		const endWindow = moment();
+		const startWindow = endWindow.clone().subtract(7, 'day');
+		return moment(noteDate).isBetween(startWindow, endWindow);
 	});
 }
 
@@ -62,10 +67,8 @@ const getFilesOnThisDayMonthStrategy = (fileMap: {}) => {
 const getFilesOnThisDayYearStrategy = (fileMap: {}) => {
 	return Object.keys(fileMap).filter((key) => {
 		const now = new Date();
-		const prepadmonth = now.getMonth() + 1;
-		const month = prepadmonth < 10 ? "0" + prepadmonth : prepadmonth;
-		const day = now.getDate();
-		const regex = new RegExp("20\\d\\d" + month + day + "\.md");
+		const cleanDate = getCleanDate(now);
+		const regex = new RegExp("20\\d\\d" + cleanDate.month + cleanDate.day + "\.md");
 		return regex.test(key);
 	});
 }
