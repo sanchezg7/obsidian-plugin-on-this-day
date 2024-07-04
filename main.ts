@@ -34,20 +34,9 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-
-		this.addRibbonIcon("atom", "Open on this day", async () => {
-			// new Notice("Clicked!");
-			const { vault } = this.app;
-			const filesOnThisDay = getFilesOnThisDay(vault.fileMap)
-			// assumes one file only
-			if(filesOnThisDay.length === 1) {
-				this.app.workspace.activeLeaf.openFile(vault.fileMap[filesOnThisDay[0]]);
-			}
-			new Notice(JSON.stringify(filesOnThisDay));
-		});
-
+		
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'View notes in the past', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('waves', 'View notes in the past', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new NoteEntriesSuggestionsModal(this.app).open();
 		});
