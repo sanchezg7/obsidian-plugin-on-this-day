@@ -4,6 +4,7 @@ import {
 	FuzzySuggestModal,
 	moment
 } from 'obsidian';
+import getMotivationalMotto from "./motivation";
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -156,8 +157,9 @@ export class NoteEntriesSuggestionsModal extends FuzzySuggestModal<SlimFile> {
 
 	// Perform action on the selected suggestion.
 	onChooseItem(slimFile: SlimFile, evt: MouseEvent | KeyboardEvent) {
-		// TODO, pick from different messages in the future
-		new Notice(`Good choice. Happy reflecting. Enable me to choose random messages in the future`);
+		const numericalDay = parseInt(moment().format("D"));
+		const motivationMotto = getMotivationalMotto(numericalDay);
+		new Notice(`Happy reflecting. Some additional inspiration: "${motivationMotto}"`);
 		if(slimFile.name === this.OPEN_ALL){
 			this.app.workspace.getLeaf(true);
 			this.results.slice(1,this.results.length).forEach(sFile => {
