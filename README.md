@@ -2,6 +2,12 @@
 
 This is a sample plugin for Obsidian (https://obsidian.md).
 
+## Running
+This will build your project and watch for changes. 
+```bash
+pnpm run dev
+```
+
 ## Icon
 https://lucide.dev/
  

@@ -81,22 +81,23 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 
 		// This one can be a book? Or the tally
-		const ribbonYearly = this.addRibbonIcon('newspaper', 'View notes on this day from past years', (evt: MouseEvent) => {
+		const ribbonYearly = this.addRibbonIcon('database', 'View notes on this day from past years', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new NoteEntriesSuggestionsModal(this.app, NOTE_QUERY_STRAT.YEARLY).open();
 		});
 
 		// This one can be a calendar
-		const ribbonMonthly = this.addRibbonIcon('waves', 'View notes on this day from past months', (evt: MouseEvent) => {
+		const ribbonMonthly = this.addRibbonIcon('calendar-range', 'View notes on this day from past months', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new NoteEntriesSuggestionsModal(this.app, NOTE_QUERY_STRAT.MONTHLY).open();
 		});
 
-		// I think this one should be the newspaper because it is the most recent
-		const ribbonPastWeek = this.addRibbonIcon('tally-5', 'View notes from this past week', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new NoteEntriesSuggestionsModal(this.app, NOTE_QUERY_STRAT.DAILY).open();
-		});
+		// Getting rid of this because I think it is noisy.
+		// // I think this one should be the newspaper because it is the most recent
+		// const ribbonPastWeek = this.addRibbonIcon('tally-5', 'View notes from this past week', (evt: MouseEvent) => {
+		// 	// Called when the user clicks the icon.
+		// 	new NoteEntriesSuggestionsModal(this.app, NOTE_QUERY_STRAT.DAILY).open();
+		// });
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
@@ -159,10 +160,14 @@ export class NoteEntriesSuggestionsModal extends FuzzySuggestModal<SlimFile> {
 		// TODO, pick from different messages in the future
 		new Notice(`Good choice. Happy reflecting. Enable me to choose random messages in the future`);
 		if(slimFile.name === this.OPEN_ALL){
-			this.app.workspace.getLeaf(true);
-			this.results.slice(1,this.results.length).forEach(sFile => {
-				this.app.workspace.getLeaf(true).openFile(this.app.vault.fileMap[sFile.path])
-			})
+			const first = this.results[1];
+			this.app.workspace.getLeaf(true).openFile(this.app.vault.fileMap[first.path]);
+			// this.app.workspace.getLeaf(true);
+			setTimeout(() => {
+				this.results.slice(2,this.results.length).forEach(sFile => {
+					this.app.workspace.getLeaf(true).openFile(this.app.vault.fileMap[sFile.path])
+				})
+			}, 50);
 		} else {
 			this.app.workspace.getLeaf().openFile(this.app.vault.fileMap[slimFile.path]);
 		}
