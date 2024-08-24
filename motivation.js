@@ -33,10 +33,10 @@ const mottos = {
  * @param numericalDay
  */
 export default (numericalDay) => {
-	const offset = 64;
+	const offset = 65;
 	const mod = numericalDay % 26;
-	const charIndex = offset + mod;
-	const char = String.fromCharCode(charIndex);
+	const charCode = offset + mod;
+	const char = String.fromCharCode(charCode);
 	const charClassIndex = 0;
 	return mottos[char][charClassIndex];
 };

@@ -69,7 +69,8 @@ const getFilesOnThisDayYearStrategy = (fileMap: {}) => {
 	return Object.keys(fileMap).filter((key) => {
 		const now = new Date();
 		const cleanDate = getCleanDate(now);
-		const regex = new RegExp("20\\d\\d" + cleanDate.month + cleanDate.day + "\.md");
+		// consider if there is a time element to it (e.g. 20200824_123456)
+		const regex = new RegExp("20\\d\\d" + cleanDate.month + cleanDate.day + "(_\\d*)?\\.md");
 		return regex.test(key);
 	});
 }
